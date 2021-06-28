@@ -14,7 +14,7 @@ of its corresponding match in the target catalogue.
 import sys
 import h5py
 import os
-from ReadConfig import  FinderOptions
+from ReadConfig import  CrossmatchOptions
 import SubFindIO
 import VELOCIraptorIO
 import pandas as pd
@@ -43,7 +43,7 @@ def makeSFtables(opt, labelsDict):
 
     # Read in the relevant fields from the SubFind halo catalogue
     halodata, nhalo, nsub = SubFindIO.loadSFhaloCatalogue(halo_fn, fields)
-    npart, offset, firstSub, npart_sub, offset_sub = halodata
+    npart, offset, firstSub, npart_sub, offset_sub = halodata.values()
     offset = offset[:,1]
     offset_sub = offset_sub[:,1]
 
@@ -190,7 +190,7 @@ def main(ref_finder, target_finder, config_file):
     if target_finder not in available_finders:
         raise SystemExit('Structure finder %s not recognised.' % target_finder, 'Please choose from ', available_finders)
 
-    opt = FinderOptions(ref_finder, target_finder, config_file)
+    opt = CrossmatchOptions(ref_finder, target_finder, config_file)
 
     # Set up notation for the two finders (used for column names in tables)
     if ref_finder == 'SF-HBT':
