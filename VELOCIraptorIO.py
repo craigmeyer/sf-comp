@@ -7,12 +7,11 @@ Routines for reading in VELOCIraptor hdf5 files
 import numpy as np
 import pandas as pd
 import h5py
-import velociraptor_python_tools as vpt
 
 # Constants for unit conversion
-# CM_TO_MPC = 3.085678e24
-# CMPERS_TO_KMPERS = 1e5
-# MSUN_TO_GRAM = 1.989e33
+CM_TO_KPC = 3.085678e21
+CMPERS_TO_KMPERS = 1e5
+MSUN_TO_GRAM = 1.989e33
 
 def readVELhalodata(base_fn, desiredFields = []):
     """
@@ -39,8 +38,11 @@ def readVELhalodata(base_fn, desiredFields = []):
         # Remove header info
         fieldnames.remove('File_id')
         fieldnames.remove('Num_of_files')
-        filednames.remove('Num_of_groups')
+        fieldnames.remove('Num_of_groups')
         fieldnames.remove('Total_num_of_groups')
+        fieldnames.remove('Configuration')
+        fieldnames.remove('SimulationInfo')
+        fieldnames.remove('UnitInfo')
     fieldtypes = [halofile[fieldname].dtype for fieldname in fieldnames]
 
     # Set up halo data dictionary
@@ -86,8 +88,8 @@ def readVELparticledata(base_fn):
 
     # Produce particle data dictionary
     partdata = {}
-    partdata['Npart'] = np.zeros(nhalo, dtype = np.uint64)
-    partdata['Npart_unbound'] = np.zeros(nhalo, dtype = np.uint64)
+    partdata['Offset'] = offset
+    partdata['Offset_unbound'] = uoffset
     partdata['Particle_IDs'] = [[] for ihalo in range(int(nhalo))]
 
     # Number of (bound/unbound) particles in each halo
@@ -106,6 +108,44 @@ def readVELparticledata(base_fn):
         partdata['Particle_IDs'][ihalo][bn_inhalo[ihalo]:] = upids[uoffset[ihalo]:uoffset[ihalo] + un_inhalo[ihalo]]
 
     return partdata
+
+
+def getUnitInfo(base_fn):
+    """
+    Extract unit information from simulation for future
+    easy conversion to desired units
+
+    Parameters:
+    fn - Filename of VELOCIraptor unit file
+
+    Returns:
+    unitinfo - Array containing the unit information
+    """
+
+    fn = base_fn + '.units'
+
+    unitfile = h5py.File(fn, 'r')
+
+    # Construct unit information dictionary
+    unitinfo = {}
+    with open(unitfile, 'r') as f:
+
+        for line in f:
+
+            # Extract conversion value
+            if line[0][0] == 'L':
+                length_unit_to_kpc = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+                unitinfo['UnitLength_in_cm'] = length_unit_to_kpc * CM_TO_KPC
+            elif line[0][0] == 'V':
+                vel_unit_to_km_per_s = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+                unitinfo['UnitVelocity_in_cm_per_s'] = vel_unit_to_km_per_s * CMPERS_TO_KMPERS
+            elif line[0][0] == 'M':
+                mass_unit_to_solarmass = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+                unitinfo['UnitMass_in_g'] = mass_unit_to_solarmass * MSUN_TO_GRAM
+            else:
+                continue
+
+    return unitinfo
 
 
 
