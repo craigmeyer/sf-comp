@@ -178,6 +178,8 @@ def crossmatchCatalogues(opt, ref_table, target_table, ref_subtable, target_subt
     matchTable.to_csv(opt.catoutfilename + '_halo.csv', index = False)
     matchTable_sub.to_csv(opt.catoutfilename + '_sub.csv', index = False)
 
+    return matchTable, matchTable_sub
+
 
 def main(ref_finder, target_finder, config_file):
 
@@ -238,7 +240,10 @@ def main(ref_finder, target_finder, config_file):
         target_table, target_subtable = makeVELtables(opt, labelsDict_target)
 
     # Perform the crossmatching
-    crossmatchCatalogues(opt, ref_table, target_table, ref_subtable, target_subtable, ref_finder, target_finder)
+    matchtable, matchtable_sub = crossmatchCatalogues(opt, ref_table, target_table, ref_subtable, target_subtable, 
+        ref_finder, target_finder)
+
+    return matchtable, matchtable_sub
 
 if __name__ == '__main__':
     script, ref, target, config = sys.argv
