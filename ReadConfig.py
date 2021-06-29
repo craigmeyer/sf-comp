@@ -122,7 +122,7 @@ class AnalysisOptions(object):
 
 				# Handle invalid configuration option
 				else:
-					raise OSerror('Invalid config option passed: %s. Please only use options in the sample config file.' % line[0])
+					raise OSError('Invalid config option passed: %s. Please only use options in the sample config file.' % line[0])
 
 
 
