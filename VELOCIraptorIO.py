@@ -124,26 +124,26 @@ def getUnitInfo(base_fn):
 
     fn = base_fn + '.units'
 
-    unitfile = h5py.File(fn, 'r')
+    unitfile = open(fn, 'r')
 
     # Construct unit information dictionary
     unitinfo = {}
-    with open(unitfile, 'r') as f:
 
-        for line in f:
+    for line in unitfile:
 
-            # Extract conversion value
-            if line[0][0] == 'L':
-                length_unit_to_kpc = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
-                unitinfo['UnitLength_in_cm'] = length_unit_to_kpc * CM_TO_KPC
-            elif line[0][0] == 'V':
-                vel_unit_to_km_per_s = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
-                unitinfo['UnitVelocity_in_cm_per_s'] = vel_unit_to_km_per_s * CMPERS_TO_KMPERS
-            elif line[0][0] == 'M':
-                mass_unit_to_solarmass = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
-                unitinfo['UnitMass_in_g'] = mass_unit_to_solarmass * MSUN_TO_GRAM
-            else:
-                continue
+        # Extract conversion value
+        if line[0][0] == 'L':
+            length_unit_to_kpc = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+            unitinfo['UnitLength_in_cm'] = length_unit_to_kpc * CM_TO_KPC
+        elif line[0][0] == 'V':
+            vel_unit_to_km_per_s = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+            unitinfo['UnitVelocity_in_cm_per_s'] = vel_unit_to_km_per_s * CMPERS_TO_KMPERS
+        elif line[0][0] == 'M':
+            mass_unit_to_solarmass = np.float64(line.strip().split(' : ')[1].split(' # ')[0])
+            unitinfo['UnitMass_in_g'] = mass_unit_to_solarmass * MSUN_TO_GRAM
+        else:
+            continue
+    unitfile.close()
 
     return unitinfo
 
